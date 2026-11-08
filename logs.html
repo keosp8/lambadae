@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Logs — Zenxy C2</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>body{background:#09090b;font-family:Inter,sans-serif;color:#fafafa}.mono{font-family:'JetBrains Mono',monospace}</style>
+</head>
+<body class="min-h-screen p-6">
+  <div class="max-w-3xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="font-semibold">Logs</h1>
+      <a href="/" class="text-xs text-zinc-500 hover:text-white">← Dashboard</a>
+    </div>
+    <div class="rounded-xl border border-zinc-900 divide-y divide-zinc-900 bg-[#0c0c0e]">
+      {% for l in logs %}
+      <div class="px-4 py-2.5 flex gap-3 text-xs mono">
+        <span class="text-zinc-600 shrink-0">{{ l.time }}</span>
+        <span class="{% if l.level=='ok' %}text-emerald-400{% elif l.level=='err' %}text-red-400{% else %}text-zinc-400{% endif %}">{{ l.msg }}</span>
+      </div>
+      {% else %}
+      <div class="px-4 py-8 text-center text-zinc-600 text-sm">No logs yet</div>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>
