@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenxy C2 — Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #050505; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(13,13,13,0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
+        .bg-grid {
+            background-size: 32px 32px;
+            background-image:
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center text-white bg-grid">
+    <div class="fixed top-[-10%] left-[20%] w-[500px] h-[500px] bg-white/5 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="glass p-8 rounded-2xl w-full max-w-md relative z-10">
+        <div class="text-center mb-8">
+            <div class="w-14 h-14 bg-white text-black rounded-xl flex items-center justify-center font-black text-xl mx-auto mb-4 shadow-[0_0_25px_rgba(255,255,255,0.3)]">Z</div>
+            <h1 class="text-2xl font-black tracking-wider">ZENXY <span class="text-gray-400 font-light">C2</span></h1>
+            <p class="text-[10px] font-mono text-gray-500 mt-1 tracking-widest uppercase">Control Panel</p>
+        </div>
+        {% if error %}
+        <p class="text-red-400 text-sm mb-4 text-center font-mono">{{ error }}</p>
+        {% endif %}
+        <form method="POST" class="space-y-4">
+            <input type="password" name="password" placeholder="Password" required autofocus
+                   class="w-full px-4 py-3 rounded-xl bg-black border border-white/10 text-white focus:outline-none focus:border-white/40 font-mono text-sm">
+            <button type="submit" class="w-full py-3 rounded-xl bg-white text-black font-bold text-sm uppercase tracking-wider hover:bg-gray-200 transition shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+                Enter
+            </button>
+        </form>
+    </div>
+</body>
+</html>
